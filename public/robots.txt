@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /assets/backup/
+Disallow: /internal/
+Disallow: /api/v1/auth/
