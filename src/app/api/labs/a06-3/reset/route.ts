@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 
   // Reset to initial state
   const initialSession = { balance: 0, cardUsed: false };
-  setSession(LAB_ID, sessionId, initialSession as unknown as Record<string, unknown>);
+  await setSession(LAB_ID, sessionId, initialSession as unknown as Record<string, unknown>);
 
   return jsonWithSession(
     { success: true, message: "Lab session reset successfully." },

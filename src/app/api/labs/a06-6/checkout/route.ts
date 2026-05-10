@@ -23,10 +23,10 @@ const PROMOS: Record<string, { type: 'percent' | 'fixed', value: number }> = {
 export async function POST(request: NextRequest) {
   const { sessionId, isNew } = getOrCreateSessionId(request);
 
-  let session = getSession<A066Session>(LAB_ID, sessionId);
+  let session = await getSession<A066Session>(LAB_ID, sessionId);
   if (!session) {
     session = { balance: 60, purchased: false };
-    setSession(LAB_ID, sessionId, session as unknown as Record<string, unknown>);
+    await setSession(LAB_ID, sessionId, session as unknown as Record<string, unknown>);
   }
 
   if (session.purchased) {
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
 
     session.balance -= Math.max(totalPayable, 0);
     session.purchased = true;
-    setSession(LAB_ID, sessionId, session as unknown as Record<string, unknown>);
+    await setSession(LAB_ID, sessionId, session as unknown as Record<string, unknown>);
 
     const exploited = totalPayable <= 0;
 

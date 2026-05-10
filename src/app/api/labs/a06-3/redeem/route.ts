@@ -25,15 +25,15 @@ export async function POST(request: NextRequest) {
   const { sessionId, isNew } = getOrCreateSessionId(request);
 
   // Initialize session if needed
-  let session = getSession<A063Session>(LAB_ID, sessionId);
+  let session = await getSession<A063Session>(LAB_ID, sessionId);
   if (!session) {
     session = { balance: 0, cardUsed: false };
-    setSession(LAB_ID, sessionId, session as unknown as Record<string, unknown>);
+    await setSession(LAB_ID, sessionId, session as unknown as Record<string, unknown>);
   }
 
   // ===== TIME OF CHECK =====
   // Read the current state — is the card already used?
-  const currentSession = getSession<A063Session>(LAB_ID, sessionId);
+  const currentSession = await getSession<A063Session>(LAB_ID, sessionId);
   if (!currentSession) {
     return jsonWithSession(
       { success: false, message: "Session error" },
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
   // ===== TIME OF USE =====
   // Re-read session (but in a real race, multiple threads would all
   // have passed the check above and would all execute this)
-  const freshSession = getSession<A063Session>(LAB_ID, sessionId);
+  const freshSession = await getSession<A063Session>(LAB_ID, sessionId);
   if (!freshSession) {
     return jsonWithSession(
       { success: false, message: "Session error" },
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
   // Add $10 to balance
   freshSession.balance += 10;
   freshSession.cardUsed = true;
-  setSession(LAB_ID, sessionId, freshSession as unknown as Record<string, unknown>);
+  await setSession(LAB_ID, sessionId, freshSession as unknown as Record<string, unknown>);
 
   return jsonWithSession(
     {

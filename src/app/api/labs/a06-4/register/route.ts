@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       createdAt: user.createdAt,
     };
 
-    setSession(LAB_ID, sessionId, sessionData);
+    await setSession(LAB_ID, sessionId, sessionData);
 
     return jsonWithSession(
       {

@@ -25,7 +25,7 @@ interface A063Session {
 export async function POST(request: NextRequest) {
   const { sessionId, isNew } = getOrCreateSessionId(request);
 
-  const session = getSession<A063Session>(LAB_ID, sessionId);
+  const session = await getSession<A063Session>(LAB_ID, sessionId);
 
   if (!session) {
     return jsonWithSession(
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
 
   // Deduct and return flag
   session.balance -= FLAG_COST;
-  setSession(LAB_ID, sessionId, session as unknown as Record<string, unknown>);
+  await setSession(LAB_ID, sessionId, session as unknown as Record<string, unknown>);
 
   return jsonWithSession(
     {

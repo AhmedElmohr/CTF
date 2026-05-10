@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
 
   // Reset the session to initial state
   const initialSession = { balance: 60, purchased: false };
-  setSession(LAB_ID, sessionId, initialSession as unknown as Record<string, unknown>);
+  await setSession(LAB_ID, sessionId, initialSession as unknown as Record<string, unknown>);
 
   return jsonWithSession({ success: true, message: "Lab session reset successfully." }, sessionId, isNew);
 }

@@ -25,7 +25,7 @@ interface A061Session {
  */
 export async function POST(request: NextRequest) {
   const { sessionId, isNew } = getOrCreateSessionId(request);
-  const session = getSession<A061Session>(LAB_ID, sessionId);
+  const session = await getSession<A061Session>(LAB_ID, sessionId);
 
   if (!session || session.step !== "question") {
     return jsonWithSession(

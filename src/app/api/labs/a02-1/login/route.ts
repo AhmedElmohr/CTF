@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     // Default credentials that were never changed
     if (username === "admin" && password === "admin") {
-      setSession(LAB_ID, sessionId, { authenticated: true, role: "admin", username });
+      await setSession(LAB_ID, sessionId, { authenticated: true, role: "admin", username });
       return jsonWithSession(
         {
           success: true,
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     // Also accept the service account
     if (username === "grafana" && password === "grafana123") {
-      setSession(LAB_ID, sessionId, { authenticated: true, role: "viewer", username });
+      await setSession(LAB_ID, sessionId, { authenticated: true, role: "viewer", username });
       return jsonWithSession(
         { success: true, message: "Authentication successful.", user: { username, role: "Viewer" } },
         sessionId, isNew

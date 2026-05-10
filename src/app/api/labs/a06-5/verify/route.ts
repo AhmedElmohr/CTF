@@ -17,7 +17,7 @@ const LAB_ID = "a06-5";
 export async function POST(request: NextRequest) {
   const { sessionId, isNew } = getOrCreateSessionId(request);
 
-  const session = getSession(LAB_ID, sessionId);
+  const session = await getSession(LAB_ID, sessionId);
 
   if (!session) {
     return jsonWithSession(

@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create session with verified=false
-    setSession(LAB_ID, sessionId, {
+    await setSession(LAB_ID, sessionId, {
       email,
       verified: false,
       signedUpAt: new Date().toISOString(),

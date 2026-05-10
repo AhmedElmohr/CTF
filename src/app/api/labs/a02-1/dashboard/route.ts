@@ -22,7 +22,7 @@ interface A021Session {
  */
 export async function GET(request: NextRequest) {
   const { sessionId, isNew } = getOrCreateSessionId(request);
-  const session = getSession<A021Session>(LAB_ID, sessionId);
+  const session = await getSession<A021Session>(LAB_ID, sessionId);
 
   if (!session || !session.authenticated) {
     return jsonWithSession(

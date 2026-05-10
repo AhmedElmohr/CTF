@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    setSession(LAB_ID, sessionId, { username: username.toLowerCase(), step: "question" });
+    await setSession(LAB_ID, sessionId, { username: username.toLowerCase(), step: "question" });
 
     return jsonWithSession(
       {

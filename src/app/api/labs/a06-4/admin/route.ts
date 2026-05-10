@@ -25,7 +25,7 @@ interface A064Session {
 export async function GET(request: NextRequest) {
   const { sessionId, isNew } = getOrCreateSessionId(request);
 
-  const session = getSession<A064Session>(LAB_ID, sessionId);
+  const session = await getSession<A064Session>(LAB_ID, sessionId);
 
   if (!session) {
     return jsonWithSession(

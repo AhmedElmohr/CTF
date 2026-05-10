@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
+import { kv } from "@vercel/kv";
 
 /**
- * In-memory session store for lab environments.
- * Each lab has its own namespace to prevent cross-lab interference.
+ * Session store for lab environments.
+ * Uses Vercel KV if configured (for serverless environments),
+ * otherwise falls back to in-memory Map (for local testing).
  * Key format: "labId:sessionId"
  */
 const store = new Map<string, Record<string, unknown>>();
@@ -37,24 +39,57 @@ function key(labId: string, sessionId: string): string {
   return `${labId}:${sessionId}`;
 }
 
-export function getSession<T = Record<string, unknown>>(
+const isKVEnabled = () => !!process.env.KV_REST_API_URL;
+
+export async function getSession<T = Record<string, unknown>>(
   labId: string,
   sessionId: string
-): T | null {
-  const data = store.get(key(labId, sessionId));
-  return (data as T) ?? null;
+): Promise<T | null> {
+  const k = key(labId, sessionId);
+  if (isKVEnabled()) {
+    try {
+      const data = await kv.get(k);
+      return (data as T) ?? null;
+    } catch (e) {
+      console.error("KV getSession error:", e);
+      return null;
+    }
+  } else {
+    // Return a clone to simulate db serialization behavior and avoid reference bugs in memory
+    const data = store.get(k);
+    return data ? (JSON.parse(JSON.stringify(data)) as T) : null;
+  }
 }
 
-export function setSession(
+export async function setSession(
   labId: string,
   sessionId: string,
   data: Record<string, unknown>
-): void {
-  store.set(key(labId, sessionId), data);
+): Promise<void> {
+  const k = key(labId, sessionId);
+  if (isKVEnabled()) {
+    try {
+      await kv.set(k, data);
+    } catch (e) {
+      console.error("KV setSession error:", e);
+    }
+  } else {
+    // Store a clone to simulate db serialization behavior
+    store.set(k, JSON.parse(JSON.stringify(data)));
+  }
 }
 
-export function resetSession(labId: string, sessionId: string): void {
-  store.delete(key(labId, sessionId));
+export async function resetSession(labId: string, sessionId: string): Promise<void> {
+  const k = key(labId, sessionId);
+  if (isKVEnabled()) {
+    try {
+      await kv.del(k);
+    } catch (e) {
+      console.error("KV resetSession error:", e);
+    }
+  } else {
+    store.delete(k);
+  }
 }
 
 /**

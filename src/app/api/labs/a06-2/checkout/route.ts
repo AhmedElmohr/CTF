@@ -27,10 +27,10 @@ export async function POST(request: NextRequest) {
   const { sessionId, isNew } = getOrCreateSessionId(request);
 
   // Initialize session if new
-  let session = getSession<A062Session>(LAB_ID, sessionId);
+  let session = await getSession<A062Session>(LAB_ID, sessionId);
   if (!session) {
     session = { balance: 50, purchased: false };
-    setSession(LAB_ID, sessionId, session as unknown as Record<string, unknown>);
+    await setSession(LAB_ID, sessionId, session as unknown as Record<string, unknown>);
   }
 
   if (session.purchased) {
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     // Process purchase
     session.balance -= totalCost;
     session.purchased = true;
-    setSession(LAB_ID, sessionId, session as unknown as Record<string, unknown>);
+    await setSession(LAB_ID, sessionId, session as unknown as Record<string, unknown>);
 
     return jsonWithSession(
       {

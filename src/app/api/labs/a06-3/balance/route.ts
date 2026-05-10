@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import {
   getOrCreateSessionId,
   getSession,
+  setSession,
   jsonWithSession,
 } from "../../_lib/sessions";
 
@@ -20,7 +21,7 @@ interface A063Session {
 export async function GET(request: NextRequest) {
   const { sessionId, isNew } = getOrCreateSessionId(request);
 
-  const session = getSession<A063Session>(LAB_ID, sessionId);
+  const session = await getSession<A063Session>(LAB_ID, sessionId);
 
   return jsonWithSession(
     {

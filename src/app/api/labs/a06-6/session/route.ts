@@ -14,7 +14,7 @@ const LAB_ID = "a06-6";
 export async function GET(request: NextRequest) {
   const { sessionId, isNew } = getOrCreateSessionId(request);
 
-  let session = getSession(LAB_ID, sessionId);
+  let session = await getSession(LAB_ID, sessionId);
   if (!session) {
     session = { balance: 60, purchased: false };
   }
