@@ -1,8 +1,8 @@
-export const fetchCache = 'force-no-store';
 import { NextRequest } from "next/server";
 import {
   getOrCreateSessionId,
   getSession,
+  getSessionBypassCache,
   setSession,
   jsonWithSession,
 } from "../../_lib/sessions";
@@ -65,9 +65,8 @@ export async function POST(request: NextRequest) {
   await new Promise((resolve) => setTimeout(resolve, 2000 + jitter));
 
   // ===== TIME OF USE =====
-  // Re-read session (but in a real race, multiple threads would all
-  // have passed the check above and would all execute this)
-  const freshSession = await getSession<A063Session>(LAB_ID, sessionId);
+  // Re-read session bypassing React fetch memoization so we don't get the old cached balance
+  const freshSession = await getSessionBypassCache<A063Session>(LAB_ID, sessionId);
   if (!freshSession) {
     return jsonWithSession(
       { success: false, message: "Session error" },

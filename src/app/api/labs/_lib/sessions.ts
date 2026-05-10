@@ -55,7 +55,26 @@ export async function getSession<T = Record<string, unknown>>(
       return null;
     }
   } else {
-    // Return a clone to simulate db serialization behavior and avoid reference bugs in memory
+    const data = store.get(k);
+    return data ? (JSON.parse(JSON.stringify(data)) as T) : null;
+  }
+}
+
+// Bypasses React's fetch memoization by using mget instead of get
+export async function getSessionBypassCache<T = Record<string, unknown>>(
+  labId: string,
+  sessionId: string
+): Promise<T | null> {
+  const k = key(labId, sessionId);
+  if (isKVEnabled()) {
+    try {
+      const [data] = await kv.mget(k);
+      return (data as T) ?? null;
+    } catch (e) {
+      console.error("KV getSessionBypassCache error:", e);
+      return null;
+    }
+  } else {
     const data = store.get(k);
     return data ? (JSON.parse(JSON.stringify(data)) as T) : null;
   }
