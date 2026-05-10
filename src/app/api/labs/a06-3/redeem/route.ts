@@ -1,3 +1,4 @@
+export const fetchCache = 'force-no-store';
 import { NextRequest } from "next/server";
 import {
   getOrCreateSessionId,
