@@ -8,11 +8,11 @@ export async function POST(request: NextRequest) {
     const { email, password, name } = await request.json();
     if (!email || !password || !name) return NextResponse.json({ error: "All fields are required" }, { status: 400 });
 
-    const existing = bankDb.getUserByEmail(email);
+    const existing = await bankDb.getUserByEmail(email);
     if (existing) return NextResponse.json({ error: "Email already exists" }, { status: 400 });
 
-    bankDb.createUser(email, password, name);
-    const user = bankDb.getUserByEmail(email);
+    await bankDb.createUser(email, password, name);
+    const user = await bankDb.getUserByEmail(email);
     
     return jsonWithSession({ success: true, user }, sessionId, isNew);
   } catch (err) {

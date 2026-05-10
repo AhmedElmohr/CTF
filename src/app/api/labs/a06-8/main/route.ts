@@ -18,16 +18,16 @@ export async function POST(request: NextRequest) {
         // from fromCurrency.
         const currencyToAdd = targetCurrency || fromCurrency;
         
-        bankDb.transfer(userId, toAccount, amount, fromCurrency, currencyToAdd);
-        const updatedUser = bankDb.getUserByEmail(body.email);
+        await bankDb.transfer(body.email, toAccount, amount, fromCurrency, currencyToAdd);
+        const updatedUser = await bankDb.getUserByEmail(body.email);
         return jsonWithSession({ success: true, user: updatedUser, message: "Transaction executed successfully!" }, sessionId, isNew);
     }
 
     // Direct Balance Update (for internal wallet movements EGP -> USD)
     if (action === "CONVERT") {
-        bankDb.updateBalance(userId, fromCurrency, -amount);
-        bankDb.updateBalance(userId, toAccount, amount);
-        const user = bankDb.getUserByEmail(body.email);
+        await bankDb.updateBalance(userId, fromCurrency, -amount, body.email);
+        await bankDb.updateBalance(userId, toAccount, amount, body.email);
+        const user = await bankDb.getUserByEmail(body.email);
         return jsonWithSession({ success: true, user }, sessionId, isNew);
     }
 
@@ -41,7 +41,8 @@ export async function GET(request: NextRequest) {
     const { sessionId, isNew } = getOrCreateSessionId(request);
     const email = request.nextUrl.searchParams.get("email");
     if (!email) return jsonWithSession({ error: "Email required" }, sessionId, isNew, 400);
-    const user = bankDb.getUserByEmail(email);
+    const user = await bankDb.getUserByEmail(email);
+    if (!user) return jsonWithSession({ error: "User not found" }, sessionId, isNew, 404);
     return jsonWithSession({ user }, sessionId, isNew);
 }
 
@@ -51,14 +52,14 @@ export async function PUT(request: NextRequest) {
         const { userId, amount, fromCurrency, toCurrency, email } = await request.json();
         
         if (fromCurrency === 'USD' && toCurrency === 'SPC') {
-            bankDb.updateBalance(userId, 'USD', -amount);
-            bankDb.updateBalance(userId, 'SPC', Math.abs(amount / 50000));
+            await bankDb.updateBalance(userId, 'USD', -amount, email);
+            await bankDb.updateBalance(userId, 'SPC', Math.abs(amount / 50000), email);
         } else if (fromCurrency === 'SPC' && toCurrency === 'USD') {
-            bankDb.updateBalance(userId, 'SPC', -amount);
-            bankDb.updateBalance(userId, 'USD', Math.abs(amount * 50000));
+            await bankDb.updateBalance(userId, 'SPC', -amount, email);
+            await bankDb.updateBalance(userId, 'USD', Math.abs(amount * 50000), email);
         }
         
-        const user = bankDb.getUserByEmail(email);
+        const user = await bankDb.getUserByEmail(email);
         return jsonWithSession({ success: true, user }, sessionId, isNew);
     } catch {
         return jsonWithSession({ error: "Exchange failed" }, sessionId, isNew, 400);
@@ -71,8 +72,8 @@ export async function DELETE(request: NextRequest) {
         const { action, amount, userId, email } = await request.json();
         if (action === "REDEEM") {
             const bonus = amount * 0.05;
-            bankDb.updateBalance(userId, 'USD', amount + bonus);
-            const user = bankDb.getUserByEmail(email);
+            await bankDb.updateBalance(userId, 'USD', amount + bonus, email);
+            const user = await bankDb.getUserByEmail(email);
             return jsonWithSession({ success: true, message: "Redeemed with bonus!", user }, sessionId, isNew);
         }
     } catch {
@@ -84,7 +85,8 @@ export async function OPTIONS(request: NextRequest) {
     const { sessionId, isNew } = getOrCreateSessionId(request);
     const email = request.nextUrl.searchParams.get("email");
     if (!email) return jsonWithSession({ error: "Email required" }, sessionId, isNew, 400);
-    const user = bankDb.getUserByEmail(email);
+    const user = await bankDb.getUserByEmail(email);
+    if (!user) return jsonWithSession({ error: "User not found" }, sessionId, isNew, 404);
     
     const total = user.usd_balance + (user.egp_balance / 50) + (user.spc_balance * 50000);
     if (total >= 1000000) return jsonWithSession({ success: true, flag: FLAG }, sessionId, isNew);

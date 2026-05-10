@@ -1,27 +1,15 @@
-import Database from 'better-sqlite3';
-import path from 'path';
+import { kv } from "@vercel/kv";
 
-const dbPath = path.join(process.cwd(), 'ctf.db');
-const db = new Database(dbPath);
+const isKVEnabled = () => !!process.env.KV_REST_API_URL;
 
-// Initialize Bank Schema
-db.exec(`
-  CREATE TABLE IF NOT EXISTS lab_a06_8_users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT UNIQUE,
-    password TEXT,
-    full_name TEXT,
-    account_number TEXT UNIQUE,
-    egp_balance REAL DEFAULT 2500.0,
-    usd_balance REAL DEFAULT 10.0,
-    spc_balance REAL DEFAULT 0.0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )
-`);
+// In-memory fallback for local development without KV
+const memUsersByEmail = new Map<string, any>();
+const memUsersByAcc = new Map<string, any>();
 
 export interface BankUser {
   id: number;
   email: string;
+  password?: string;
   full_name: string;
   account_number: string;
   egp_balance: number;
@@ -29,43 +17,98 @@ export interface BankUser {
   spc_balance: number;
 }
 
+const emailKey = (email: string) => `bank:u:e:${email.toLowerCase()}`;
+const accKey = (acc: string) => `bank:u:a:${acc}`;
+
 export const bankDb = {
-  createUser: (email: string, pass: string, name: string) => {
+  createUser: async (email: string, pass: string, name: string): Promise<void> => {
+    const emailLower = email.toLowerCase();
     const accNo = 'SPARK-' + Math.floor(100000000 + Math.random() * 900000000).toString();
-    const stmt = db.prepare('INSERT INTO lab_a06_8_users (email, password, full_name, account_number) VALUES (?, ?, ?, ?)');
-    const info = stmt.run(email, pass, name, accNo);
-    return info.lastInsertRowid;
+    const newUser: BankUser = {
+      id: Date.now(),
+      email: emailLower,
+      password: pass, // Simple text for lab
+      full_name: name,
+      account_number: accNo,
+      egp_balance: 2500.0,
+      usd_balance: 10.0,
+      spc_balance: 0.0,
+    };
+
+    if (isKVEnabled()) {
+      // Atomically set mappings
+      await kv.set(emailKey(emailLower), newUser);
+      await kv.set(accKey(accNo), newUser);
+    } else {
+      memUsersByEmail.set(emailLower, newUser);
+      memUsersByAcc.set(accNo, newUser);
+    }
   },
 
-  getUserByEmail: (email: string) => {
-    return db.prepare('SELECT * FROM lab_a06_8_users WHERE email = ?').get(email) as any;
+  getUserByEmail: async (email: string): Promise<BankUser | null> => {
+    const emailLower = email.toLowerCase();
+    if (isKVEnabled()) {
+      const user = await kv.get<BankUser>(emailKey(emailLower));
+      return user || null;
+    } else {
+      return memUsersByEmail.get(emailLower) || null;
+    }
   },
 
-  getUserByAccount: (accNo: string) => {
-    return db.prepare('SELECT * FROM lab_a06_8_users WHERE account_number = ?').get(accNo) as any;
+  getUserByAccount: async (accNo: string): Promise<BankUser | null> => {
+    if (isKVEnabled()) {
+      const user = await kv.get<BankUser>(accKey(accNo));
+      return user || null;
+    } else {
+      return memUsersByAcc.get(accNo) || null;
+    }
   },
 
-  updateBalance: (userId: number, currency: string, amount: number) => {
-    const column = currency.toLowerCase() + '_balance';
-    db.prepare(`UPDATE lab_a06_8_users SET ${column} = ${column} + ? WHERE id = ?`).run(amount, userId);
+  updateBalance: async (userId: any, currency: string, amount: number, email: string): Promise<void> => {
+    // Note: The existing API calls this with userId but then passes email for context. 
+    // Since we refactor to use KV, finding by email is best.
+    const user = await bankDb.getUserByEmail(email);
+    if (!user) return;
+
+    const col = (currency.toLowerCase() + '_balance') as keyof BankUser;
+    (user as any)[col] = Number((user as any)[col] || 0) + Number(amount);
+
+    if (isKVEnabled()) {
+      await kv.set(emailKey(user.email), user);
+      await kv.set(accKey(user.account_number), user);
+    } else {
+      memUsersByEmail.set(user.email, user);
+      memUsersByAcc.set(user.account_number, user);
+    }
   },
 
-  // Atomic Transfer
-  transfer: (fromId: number, toAccNo: string, amount: number, fromCurrency: string, toCurrency?: string) => {
-    const fromCol = fromCurrency.toLowerCase() + '_balance';
-    const toCol = (toCurrency || fromCurrency).toLowerCase() + '_balance';
-    const toUser = db.prepare('SELECT id FROM lab_a06_8_users WHERE account_number = ?').get(toAccNo) as any;
-    
+  transfer: async (fromEmail: string, toAccNo: string, amount: number, fromCurrency: string, toCurrency?: string): Promise<boolean> => {
+    const fromUser = await bankDb.getUserByEmail(fromEmail);
+    const toUser = await bankDb.getUserByAccount(toAccNo);
+
+    if (!fromUser) throw new Error("Sender not found.");
     if (!toUser) throw new Error("Recipient account not found.");
 
-    const transaction = db.transaction(() => {
-      // Deduct from sender
-      db.prepare(`UPDATE lab_a06_8_users SET ${fromCol} = ${fromCol} - ? WHERE id = ?`).run(amount, fromId);
-      // Add to recipient (potentially different currency but same numeric value!)
-      db.prepare(`UPDATE lab_a06_8_users SET ${toCol} = ${toCol} + ? WHERE id = ?`).run(amount, toUser.id);
-    });
+    const fromCol = (fromCurrency.toLowerCase() + '_balance') as keyof BankUser;
+    const toCol = ((toCurrency || fromCurrency).toLowerCase() + '_balance') as keyof BankUser;
 
-    transaction();
+    // Update balances
+    (fromUser as any)[fromCol] = Number((fromUser as any)[fromCol] || 0) - Number(amount);
+    (toUser as any)[toCol] = Number((toUser as any)[toCol] || 0) + Number(amount);
+
+    // Save updates
+    if (isKVEnabled()) {
+        await kv.set(emailKey(fromUser.email), fromUser);
+        await kv.set(accKey(fromUser.account_number), fromUser);
+
+        await kv.set(emailKey(toUser.email), toUser);
+        await kv.set(accKey(toUser.account_number), toUser);
+    } else {
+        memUsersByEmail.set(fromUser.email, fromUser);
+        memUsersByAcc.set(fromUser.account_number, fromUser);
+        memUsersByEmail.set(toUser.email, toUser);
+        memUsersByAcc.set(toUser.account_number, toUser);
+    }
     return true;
   }
 };

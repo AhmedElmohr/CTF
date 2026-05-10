@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
   const { sessionId, isNew } = getOrCreateSessionId(request);
   try {
     const { email, password } = await request.json();
-    const user = bankDb.getUserByEmail(email);
+    const user = await bankDb.getUserByEmail(email);
 
     if (!user || user.password !== password) {
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
