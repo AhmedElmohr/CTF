@@ -1,0 +1,8 @@
+# SPARK INFRASTRUCTURE - INTERNAL ACCESS ONLY
+# Last security audit: 2026-05-08
+
+GATEWAY_USER: spark_admin
+PASS_HASH: $argon2id$v=19$m=65536,t=3,p=4...
+SYSTEM_FLAG: flag{spark_st0r4ge_l34k_v2}
+
+[CONFIDENTIAL] Keep this information within the DevOps team.

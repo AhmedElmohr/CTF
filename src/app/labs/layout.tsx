@@ -12,7 +12,7 @@ export default function LabsLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased min-h-screen bg-surface-darkest text-slate-200`}>
+      <body suppressHydrationWarning className={`${inter.className} antialiased min-h-screen bg-surface-darkest text-slate-200`}>
         {children}
       </body>
     </html>
