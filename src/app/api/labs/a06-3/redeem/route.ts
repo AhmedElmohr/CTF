@@ -60,7 +60,8 @@ export async function POST(request: NextRequest) {
   // Simulate processing delay (database write, payment gateway, etc.)
   // This is where the vulnerability exists — multiple requests can pass
   // the check above before any of them reach the update below.
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  const jitter = Math.floor(Math.random() * 2000);
+  await new Promise((resolve) => setTimeout(resolve, 2000 + jitter));
 
   // ===== TIME OF USE =====
   // Re-read session (but in a real race, multiple threads would all
