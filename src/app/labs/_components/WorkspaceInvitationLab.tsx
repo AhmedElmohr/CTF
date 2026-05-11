@@ -60,7 +60,6 @@ export default function WorkspaceInvitationLab() {
   
   const [sessionData, setSessionData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [requestPayload, setRequestPayload] = useState(`{\n  "theme": "dark",\n  "layout": "grid"\n}`);
 
   const fetchSession = async () => {
     try {
@@ -120,23 +119,27 @@ export default function WorkspaceInvitationLab() {
     setIsSubmitting(true);
     setMessage(null);
     try {
-      // Attempt to parse to ensure valid JSON before sending
-      const parsedBody = JSON.parse(requestPayload);
-      
       const res = await fetch("/api/labs/a06-9/settings", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(parsedBody)
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json" 
+        },
+        body: JSON.stringify({ 
+          theme: "dark", 
+          layout: "grid", 
+          isVaultUnlocked: false 
+        })
       });
       const result = await res.json();
       if (res.ok) {
-        setMessage({ type: 'success', text: "API Execution Successful." });
+        setMessage({ type: 'success', text: "Application configuration pushed to server." });
         fetchSession();
       } else {
-        setMessage({ type: 'error', text: result.message || "Endpoint returned error status." });
+        setMessage({ type: 'error', text: result.message || "Update failed." });
       }
     } catch (err) {
-      setMessage({ type: 'error', text: "Syntax Error: Body must be valid JSON." });
+      setMessage({ type: 'error', text: "Network propagation error." });
     } finally {
       setIsSubmitting(false);
     }
@@ -715,33 +718,21 @@ export default function WorkspaceInvitationLab() {
                              </div>
                           </div>
 
-                          {/* Payload Constructor Feature */}
+                          {/* Dynamic Feature to update preferences */}
                           <div className="w-full border-t border-white/5 pt-6">
-                             <p className="text-[10px] font-black uppercase text-indigo-400 mb-3 text-center flex items-center justify-center gap-2">
-                               <Terminal className="w-3 h-3" /> Advanced Payload Workbench
-                             </p>
-                             
-                             <form onSubmit={handleUpdateSettings} className="space-y-3">
-                                <div className="relative group">
-                                  <div className="absolute top-2 right-3 text-[8px] font-black text-slate-600 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800 uppercase">Editable JSON</div>
-                                  <textarea 
-                                    value={requestPayload}
-                                    onChange={(e) => setRequestPayload(e.target.value)}
-                                    className="w-full bg-black/60 font-mono text-xs text-emerald-400 border border-white/10 rounded-xl p-4 focus:outline-none focus:border-emerald-500/50 transition-all min-h-[100px] resize-none"
-                                    spellCheck="false"
-                                  />
+                             <p className="text-[10px] font-black uppercase text-slate-500 mb-4 text-center">Active UI Deployment Control</p>
+                             <form onSubmit={handleUpdateSettings} className="flex items-center justify-center gap-4">
+                                <div className="text-xs text-slate-300 bg-white/5 px-4 py-2.5 rounded-xl border border-white/5 font-bold flex items-center gap-2">
+                                   <Settings className="w-3 h-3 opacity-50" /> State: Normal
                                 </div>
-                                
-                                <div className="flex justify-center">
-                                  <button 
-                                    type="submit" 
-                                    disabled={isSubmitting}
-                                    className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-black py-3 rounded-xl shadow-lg shadow-indigo-500/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2 uppercase tracking-wider"
-                                  >
-                                    {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-3 h-3" />}
-                                    Execute PUT Request
-                                  </button>
-                                </div>
+                                <button 
+                                  type="submit" 
+                                  disabled={isSubmitting}
+                                  className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black px-6 py-3 rounded-xl shadow-lg shadow-indigo-600/20 transition-all disabled:opacity-50 flex items-center gap-2"
+                                >
+                                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-3 h-3" />}
+                                  Propagate System Settings
+                                </button>
                              </form>
                              {message && activeTab === "admin" && (
                                <div className={clsx(
