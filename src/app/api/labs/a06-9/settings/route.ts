@@ -10,10 +10,10 @@ const LAB_ID = "a06-9";
 const ADMIN_WORKSPACE = "WS_ADMIN_SECRET_999";
 
 /**
- * PUT /api/labs/a06-9/settings
+ * POST /api/labs/a06-9/settings
  * Vulnerable endpoint enabling mass assignment of properties into user session.
  */
-export async function PUT(request: NextRequest) {
+export async function POST(request: NextRequest) {
   const { sessionId, isNew } = getOrCreateSessionId(request);
   let sessionData = await getSession(LAB_ID, sessionId);
 

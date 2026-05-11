@@ -116,11 +116,13 @@ export default function WorkspaceInvitationLab() {
   };
   const handleUpdateSettings = async (e?: any) => {
     if (e && e.preventDefault) e.preventDefault();
+    alert("Transmission Sequence Initiated! Check your HTTP Interception proxy now.");
     setIsSubmitting(true);
     setMessage(null);
     try {
+      console.log("[SYS] Dispatching configuration payload...");
       const res = await fetch("/api/labs/a06-9/settings", {
-        method: "PUT",
+        method: "POST",
         headers: { 
           "Content-Type": "application/json",
           "Accept": "application/json" 
@@ -763,7 +765,7 @@ export default function WorkspaceInvitationLab() {
                             <div className="space-y-4 mt-auto">
                               <div className="bg-black/50 p-4 rounded-xl border border-white/5">
                                 <div className="text-[10px] font-black uppercase text-emerald-400 mb-1 tracking-widest">Target Endpoint</div>
-                                <code className="text-xs text-slate-300 font-mono font-bold">PUT /api/labs/a06-9/settings</code>
+                                <code className="text-xs text-slate-300 font-mono font-bold">POST /api/labs/a06-9/settings</code>
                               </div>
                               <div className="bg-black/50 p-4 rounded-xl border border-white/5 relative group">
                                 <div className="text-[10px] font-black uppercase text-indigo-400 mb-2 tracking-widest flex justify-between">
