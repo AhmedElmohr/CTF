@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const FLAG = "flag{d1r_l1st1ng_3xp0s3d_m3}";
+const FLAG = "flag{spark_st0r4ge_l34k_v2}";
 
 const fileContents: Record<string, string> = {
   "SYSTEM_ACCESS.txt": `# SPARK INFRASTRUCTURE - INTERNAL ACCESS ONLY
