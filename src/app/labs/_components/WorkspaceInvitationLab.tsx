@@ -114,8 +114,8 @@ export default function WorkspaceInvitationLab() {
       setMessage({ type: 'error', text: "Failed to connect to API." });
     }
   };
-  const handleUpdateSettings = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleUpdateSettings = async (e?: any) => {
+    if (e && e.preventDefault) e.preventDefault();
     setIsSubmitting(true);
     setMessage(null);
     try {
@@ -721,19 +721,20 @@ export default function WorkspaceInvitationLab() {
                           {/* Dynamic Feature to update preferences */}
                           <div className="w-full border-t border-white/5 pt-6">
                              <p className="text-[10px] font-black uppercase text-slate-500 mb-4 text-center">Active UI Deployment Control</p>
-                             <form onSubmit={handleUpdateSettings} className="flex items-center justify-center gap-4">
+                             <div className="flex items-center justify-center gap-4">
                                 <div className="text-xs text-slate-300 bg-white/5 px-4 py-2.5 rounded-xl border border-white/5 font-bold flex items-center gap-2">
                                    <Settings className="w-3 h-3 opacity-50" /> State: Normal
                                 </div>
                                 <button 
-                                  type="submit" 
+                                  type="button"
+                                  onClick={() => handleUpdateSettings()}
                                   disabled={isSubmitting}
-                                  className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black px-6 py-3 rounded-xl shadow-lg shadow-indigo-600/20 transition-all disabled:opacity-50 flex items-center gap-2"
+                                  className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black px-6 py-3 rounded-xl shadow-lg shadow-indigo-600/20 transition-all disabled:opacity-50 flex items-center gap-2 cursor-pointer"
                                 >
                                   {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-3 h-3" />}
                                   Propagate System Settings
                                 </button>
-                             </form>
+                             </div>
                              {message && activeTab === "admin" && (
                                <div className={clsx(
                                  "mt-4 text-center text-xs font-bold flex items-center justify-center gap-2 py-2 rounded-xl animate-in zoom-in-95 duration-200 border",
