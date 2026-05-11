@@ -124,5 +124,16 @@ export const initialChallenges: Challenge[] = [
     cwe: ["CWE-840", "CWE-602", "CWE-362"],
     description: "Spark Global Bank is the most advanced financial simulation. It combines currency exchange flaws, precision rounding errors, and multi-stage trust violations. Chain at least 3 different logic flaws to exfiltrate the ultimate administrative flag.",
     flagHash: ""
+  },
+  {
+    id: "a06-9",
+    name: "Workspace Invitation Bypass",
+    category: "A06:2025",
+    difficulty: "Hard",
+    points: 600,
+    goal: "Bypass workspace invitation access controls to add yourself to an administrative workspace.",
+    cwe: ["CWE-843", "CWE-639", "CWE-285"],
+    description: "The B2B portal allows you to invite users to your workspace. The API uses middleware to check permissions but incorrectly handles array types in JSON bodies. Exploit this data binding type confusion to gain access to the 'admin_workspace' and read the flag.",
+    flagHash: ""
   }
 ];

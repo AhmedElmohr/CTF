@@ -3,8 +3,16 @@ interface RateLimitRecord {
   resetTime: number;
 }
 
+const globalForRateLimits = globalThis as unknown as {
+  rateLimits: Map<string, RateLimitRecord>;
+};
+
 // In-memory store: IP_CHALLENGE_ID -> RateLimitRecord
-const rateLimits = new Map<string, RateLimitRecord>();
+const rateLimits = globalForRateLimits.rateLimits || new Map<string, RateLimitRecord>();
+
+if (process.env.NODE_ENV !== "production") {
+  globalForRateLimits.rateLimits = rateLimits;
+}
 
 const MAX_ATTEMPTS = 5;
 const WINDOW_MS = 60 * 1000; // 1 minute

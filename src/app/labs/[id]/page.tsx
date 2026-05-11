@@ -13,6 +13,7 @@ import RaceConditionLab from "../_components/RaceConditionLab";
 import CouponStackingLab from "../_components/CouponStackingLab";
 import AdvancedPriceManipulationLab from "../_components/AdvancedPriceManipulationLab";
 import SparkFinancialHub from "../_components/SparkFinancialHub";
+import WorkspaceInvitationLab from "../_components/WorkspaceInvitationLab";
 
 export default async function LabPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -35,6 +36,7 @@ export default async function LabPage({ params }: { params: Promise<{ id: string
       "a06-6": "https://checkout.marketplace-pro.local/order",
       "a06-7": "https://finance.spark-hub.local/account",
       "a06-8": "https://bank.spark-financial.local/transfer",
+      "a06-9": "https://b2b.workspace-portal.local/dashboard",
     };
     return urls[cid] || `https://${cid}.simulation.local`;
   };
@@ -51,6 +53,7 @@ export default async function LabPage({ params }: { params: Promise<{ id: string
     if (id === "a06-6") return <CouponStackingLab />;
     if (id === "a06-7") return <AdvancedPriceManipulationLab />;
     if (id === "a06-8") return <SparkFinancialHub />;
+    if (id === "a06-9") return <WorkspaceInvitationLab />;
     
     return (
       <div className="flex flex-col items-center justify-center h-full p-10 text-center">
@@ -61,9 +64,13 @@ export default async function LabPage({ params }: { params: Promise<{ id: string
   };
 
   return (
-    <div className="min-h-screen">
+    <LabEnvironment 
+      challengeId={challenge.id} 
+      targetUrl={getTargetUrl(id)} 
+      challengeName={challenge.name}
+    >
       {renderLab()}
-    </div>
+    </LabEnvironment>
   );
 }
 

@@ -2,9 +2,19 @@ import { kv } from "@vercel/kv";
 
 const isKVEnabled = () => !!process.env.KV_REST_API_URL;
 
+const globalForBank = globalThis as unknown as {
+  memUsersByEmail: Map<string, any>;
+  memUsersByAcc: Map<string, any>;
+};
+
 // In-memory fallback for local development without KV
-const memUsersByEmail = new Map<string, any>();
-const memUsersByAcc = new Map<string, any>();
+const memUsersByEmail = globalForBank.memUsersByEmail || new Map<string, any>();
+const memUsersByAcc = globalForBank.memUsersByAcc || new Map<string, any>();
+
+if (process.env.NODE_ENV !== "production") {
+  globalForBank.memUsersByEmail = memUsersByEmail;
+  globalForBank.memUsersByAcc = memUsersByAcc;
+}
 
 export interface BankUser {
   id: number;

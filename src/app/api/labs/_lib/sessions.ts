@@ -8,7 +8,15 @@ import { kv } from "@vercel/kv";
  * otherwise falls back to in-memory Map (for local testing).
  * Key format: "labId:sessionId"
  */
-const store = new Map<string, Record<string, unknown>>();
+const globalForSessions = globalThis as unknown as {
+  store: Map<string, Record<string, unknown>>;
+};
+
+const store = globalForSessions.store || new Map<string, Record<string, unknown>>();
+
+if (process.env.NODE_ENV !== "production") {
+  globalForSessions.store = store;
+}
 
 const COOKIE_NAME = "lab-session";
 
