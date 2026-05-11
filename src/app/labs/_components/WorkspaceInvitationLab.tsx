@@ -60,6 +60,7 @@ export default function WorkspaceInvitationLab() {
   
   const [sessionData, setSessionData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [requestPayload, setRequestPayload] = useState(`{\n  "theme": "dark",\n  "layout": "grid"\n}`);
 
   const fetchSession = async () => {
     try {
@@ -119,20 +120,23 @@ export default function WorkspaceInvitationLab() {
     setIsSubmitting(true);
     setMessage(null);
     try {
+      // Attempt to parse to ensure valid JSON before sending
+      const parsedBody = JSON.parse(requestPayload);
+      
       const res = await fetch("/api/labs/a06-9/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ theme: "dark", layout: "grid" }) // Standard user visible settings
+        body: JSON.stringify(parsedBody)
       });
       const result = await res.json();
       if (res.ok) {
-        setMessage({ type: 'success', text: "Application settings updated on cloud cluster." });
+        setMessage({ type: 'success', text: "API Execution Successful." });
         fetchSession();
       } else {
-        setMessage({ type: 'error', text: result.message || "Settings update failed." });
+        setMessage({ type: 'error', text: result.message || "Endpoint returned error status." });
       }
     } catch (err) {
-      setMessage({ type: 'error', text: "Could not update settings." });
+      setMessage({ type: 'error', text: "Syntax Error: Body must be valid JSON." });
     } finally {
       setIsSubmitting(false);
     }
@@ -711,24 +715,41 @@ export default function WorkspaceInvitationLab() {
                              </div>
                           </div>
 
-                          {/* Dummy Feature to update preferences */}
+                          {/* Payload Constructor Feature */}
                           <div className="w-full border-t border-white/5 pt-6">
-                             <p className="text-[10px] font-black uppercase text-slate-500 mb-4 text-center">Workspace User Configuration</p>
-                             <form onSubmit={handleUpdateSettings} className="flex items-center justify-center gap-4">
-                                <div className="text-xs text-slate-300 bg-white/5 px-4 py-2.5 rounded-xl border border-white/5 font-bold flex items-center gap-2">
-                                   <Settings className="w-3 h-3 opacity-50" /> Prefs: Dark, Grid
+                             <p className="text-[10px] font-black uppercase text-indigo-400 mb-3 text-center flex items-center justify-center gap-2">
+                               <Terminal className="w-3 h-3" /> Advanced Payload Workbench
+                             </p>
+                             
+                             <form onSubmit={handleUpdateSettings} className="space-y-3">
+                                <div className="relative group">
+                                  <div className="absolute top-2 right-3 text-[8px] font-black text-slate-600 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800 uppercase">Editable JSON</div>
+                                  <textarea 
+                                    value={requestPayload}
+                                    onChange={(e) => setRequestPayload(e.target.value)}
+                                    className="w-full bg-black/60 font-mono text-xs text-emerald-400 border border-white/10 rounded-xl p-4 focus:outline-none focus:border-emerald-500/50 transition-all min-h-[100px] resize-none"
+                                    spellCheck="false"
+                                  />
                                 </div>
-                                <button 
-                                  type="submit" 
-                                  disabled={isSubmitting}
-                                  className="bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-black px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-500/20 transition-all disabled:opacity-50"
-                                >
-                                  {isSubmitting ? "Saving..." : "Save Client UI State"}
-                                </button>
+                                
+                                <div className="flex justify-center">
+                                  <button 
+                                    type="submit" 
+                                    disabled={isSubmitting}
+                                    className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-black py-3 rounded-xl shadow-lg shadow-indigo-500/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2 uppercase tracking-wider"
+                                  >
+                                    {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-3 h-3" />}
+                                    Execute PUT Request
+                                  </button>
+                                </div>
                              </form>
                              {message && activeTab === "admin" && (
-                               <div className="mt-4 text-center text-xs font-bold text-emerald-400 flex items-center justify-center gap-2 bg-emerald-500/10 py-2 rounded-xl animate-in zoom-in-95 duration-200">
-                                 <CheckCircle2 className="w-3 h-3" /> {message.text}
+                               <div className={clsx(
+                                 "mt-4 text-center text-xs font-bold flex items-center justify-center gap-2 py-2 rounded-xl animate-in zoom-in-95 duration-200 border",
+                                 message.type === 'success' ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-rose-500/10 border-rose-500/20 text-rose-400"
+                               )}>
+                                 {message.type === 'success' ? <CheckCircle2 className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
+                                 {message.text}
                                </div>
                              )}
                           </div>
