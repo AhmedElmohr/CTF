@@ -9,24 +9,46 @@ import {
   AlertCircle,
   LayoutDashboard,
   Building2,
-  ChevronRight,
   ShieldAlert,
   Send,
   Loader2,
   Activity,
-  HardDrive,
   CreditCard,
   Settings,
   Bell,
   Search,
   Plus,
-  ArrowUpRight,
-  UserPlus
+  UserPlus,
+  Lock,
+  Terminal,
+  List,
+  Fingerprint,
+  Key,
+  Globe,
+  Database
 } from "lucide-react";
 import clsx from "clsx";
 
+const MOCK_MEMBERS = [
+  { id: 1, name: "Sarah Jenkins", email: "sarah.j@company.com", role: "Manager", status: "Active" },
+  { id: 2, name: "David Chen", email: "d.chen@company.com", role: "Developer", status: "Active" },
+  { id: 3, name: "Elena Rodriguez", email: "elena.r@company.com", role: "Designer", status: "Offline" },
+  { id: 4, name: "Michael Chang", email: "m.chang@company.com", role: "Contractor", status: "Invited" },
+  { id: 5, name: "Jessica Smith", email: "jsmith@company.com", role: "Viewer", status: "Active" },
+];
+
+const MOCK_AUDIT_LOGS = [
+  { id: 101, action: "User Login", user: "system_admin", ip: "192.168.1.45", time: "2 mins ago", status: "Success" },
+  { id: 102, action: "API Key Generated", user: "sarah.j", ip: "10.0.0.12", time: "15 mins ago", status: "Success" },
+  { id: 103, action: "Failed Login Attempt", user: "unknown", ip: "45.22.11.99", time: "1 hour ago", status: "Failed" },
+  { id: 104, action: "Workspace Policy Updated", user: "system_admin", ip: "192.168.1.45", time: "3 hours ago", status: "Success" },
+  { id: 105, action: "Data Export Requested", user: "d.chen", ip: "10.0.0.15", time: "1 day ago", status: "Success" },
+];
+
+type TabType = "dashboard" | "directory" | "audit" | "invitations" | "security" | "admin";
+
 export default function WorkspaceInvitationLab() {
-  const [activeTab, setActiveTab] = useState<"dashboard" | "invitations" | "admin">("dashboard");
+  const [activeTab, setActiveTab] = useState<TabType>("dashboard");
   const [emailToInvite, setEmailToInvite] = useState("");
   const [selectedWorkspace, setSelectedWorkspace] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -114,40 +136,33 @@ export default function WorkspaceInvitationLab() {
             </span>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-8">
             <div>
               <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 px-4">Overview</div>
               <nav className="space-y-1">
-                <button 
-                  onClick={() => setActiveTab("dashboard")}
-                  className={clsx(
-                    "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm",
-                    activeTab === "dashboard" ? "bg-indigo-500/10 text-indigo-400" : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
-                  )}
-                >
+                <button onClick={() => setActiveTab("dashboard")} className={clsx("w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm", activeTab === "dashboard" ? "bg-indigo-500/10 text-indigo-400" : "text-slate-400 hover:bg-white/5 hover:text-slate-200")}>
                   <LayoutDashboard className="w-4 h-4" /> Workspace Dashboard
                 </button>
-                <button 
-                  onClick={() => setActiveTab("invitations")}
-                  className={clsx(
-                    "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm",
-                    activeTab === "invitations" ? "bg-indigo-500/10 text-indigo-400" : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
-                  )}
-                >
-                  <UserPlus className="w-4 h-4" /> Team Invitations
+                <button onClick={() => setActiveTab("directory")} className={clsx("w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm", activeTab === "directory" ? "bg-indigo-500/10 text-indigo-400" : "text-slate-400 hover:bg-white/5 hover:text-slate-200")}>
+                  <Users className="w-4 h-4" /> Members Directory
+                </button>
+                <button onClick={() => setActiveTab("audit")} className={clsx("w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm", activeTab === "audit" ? "bg-indigo-500/10 text-indigo-400" : "text-slate-400 hover:bg-white/5 hover:text-slate-200")}>
+                  <List className="w-4 h-4" /> Audit Logs
                 </button>
               </nav>
             </div>
 
             <div>
-              <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 px-4">Settings</div>
+              <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 px-4">Management</div>
               <nav className="space-y-1">
-                <button className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-slate-500 font-bold text-sm cursor-not-allowed">
-                  <div className="flex items-center gap-3"><CreditCard className="w-4 h-4" /> Billing</div>
-                  <Lock className="w-3 h-3 opacity-50" />
+                <button onClick={() => setActiveTab("invitations")} className={clsx("w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm", activeTab === "invitations" ? "bg-indigo-500/10 text-indigo-400" : "text-slate-400 hover:bg-white/5 hover:text-slate-200")}>
+                  <UserPlus className="w-4 h-4" /> Team Invitations
+                </button>
+                <button onClick={() => setActiveTab("security")} className={clsx("w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm", activeTab === "security" ? "bg-indigo-500/10 text-indigo-400" : "text-slate-400 hover:bg-white/5 hover:text-slate-200")}>
+                  <Shield className="w-4 h-4" /> Security Settings
                 </button>
                 <button className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-slate-500 font-bold text-sm cursor-not-allowed">
-                  <div className="flex items-center gap-3"><Settings className="w-4 h-4" /> Organization</div>
+                  <div className="flex items-center gap-3"><CreditCard className="w-4 h-4" /> Billing</div>
                   <Lock className="w-3 h-3 opacity-50" />
                 </button>
               </nav>
@@ -170,7 +185,7 @@ export default function WorkspaceInvitationLab() {
               <div className="flex items-center gap-3">
                 <ShieldAlert className="w-4 h-4" /> System Admin
               </div>
-              {!sessionData?.user?.isAdmin && <Shield className="w-3 h-3 text-slate-500" />}
+              {!sessionData?.user?.isAdmin && <Lock className="w-3 h-3 text-slate-500" />}
             </button>
           </div>
         </div>
@@ -241,7 +256,7 @@ export default function WorkspaceInvitationLab() {
                 </div>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   <div className="bg-[#121214] p-6 rounded-[2rem] border border-white/5 relative overflow-hidden group hover:border-indigo-500/30 transition-colors">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-indigo-500/20 transition-all"></div>
                     <div className="relative z-10">
@@ -260,7 +275,7 @@ export default function WorkspaceInvitationLab() {
                         <Users className="w-6 h-6 text-emerald-400" />
                       </div>
                       <div className="text-4xl font-black text-white mb-2">1,248</div>
-                      <div className="text-sm font-bold text-slate-500">Total Network Members</div>
+                      <div className="text-sm font-bold text-slate-500">Network Members</div>
                     </div>
                   </div>
 
@@ -274,43 +289,207 @@ export default function WorkspaceInvitationLab() {
                       <div className="text-sm font-bold text-slate-500">System Uptime</div>
                     </div>
                   </div>
+
+                  <div className="bg-[#121214] p-6 rounded-[2rem] border border-white/5 relative overflow-hidden group hover:border-purple-500/30 transition-colors">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-purple-500/20 transition-all"></div>
+                    <div className="relative z-10">
+                      <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center mb-6">
+                        <Database className="w-6 h-6 text-purple-400" />
+                      </div>
+                      <div className="text-4xl font-black text-white mb-2">45<span className="text-2xl text-slate-500">TB</span></div>
+                      <div className="text-sm font-bold text-slate-500">Storage Used</div>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Workspace List */}
-                <div>
-                  <h3 className="text-lg font-black text-white mb-6">Your Accessible Workspaces</h3>
-                  <div className="bg-[#121214] rounded-[2rem] border border-white/5 overflow-hidden">
-                    <table className="w-full text-left">
-                      <thead className="bg-white/[0.02] border-b border-white/5 text-[10px] font-black uppercase tracking-widest text-slate-500">
-                        <tr>
-                          <th className="px-6 py-4">Workspace ID</th>
-                          <th className="px-6 py-4">Status</th>
-                          <th className="px-6 py-4">Role</th>
-                          <th className="px-6 py-4 text-right">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-white/5 text-sm">
-                        {sessionData?.user?.workspaces.map((ws: string) => (
-                          <tr key={ws} className="hover:bg-white/[0.02] transition-colors">
-                            <td className="px-6 py-5 font-bold text-white flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-black text-xs">
-                                WS
-                              </div>
-                              {ws}
-                            </td>
-                            <td className="px-6 py-5">
-                              <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold border border-emerald-500/20">Active</span>
-                            </td>
-                            <td className="px-6 py-5 text-slate-400">
-                              {ws === "WS_ADMIN_SECRET_999" ? "System Admin" : "Guest Viewer"}
-                            </td>
-                            <td className="px-6 py-5 text-right">
-                              <button className="text-indigo-400 font-bold hover:text-indigo-300 transition-colors">Enter Portal</button>
-                            </td>
+                <div className="grid lg:grid-cols-3 gap-8">
+                  {/* Workspace List */}
+                  <div className="lg:col-span-2">
+                    <h3 className="text-lg font-black text-white mb-6">Your Accessible Workspaces</h3>
+                    <div className="bg-[#121214] rounded-[2rem] border border-white/5 overflow-hidden">
+                      <table className="w-full text-left">
+                        <thead className="bg-white/[0.02] border-b border-white/5 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                          <tr>
+                            <th className="px-6 py-4">Workspace ID</th>
+                            <th className="px-6 py-4">Status</th>
+                            <th className="px-6 py-4">Role</th>
+                            <th className="px-6 py-4 text-right">Action</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="divide-y divide-white/5 text-sm">
+                          {sessionData?.user?.workspaces.map((ws: string) => (
+                            <tr key={ws} className="hover:bg-white/[0.02] transition-colors">
+                              <td className="px-6 py-5 font-bold text-white flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-black text-xs">
+                                  WS
+                                </div>
+                                {ws}
+                              </td>
+                              <td className="px-6 py-5">
+                                <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold border border-emerald-500/20">Active</span>
+                              </td>
+                              <td className="px-6 py-5 text-slate-400">
+                                {ws === "WS_ADMIN_SECRET_999" ? "System Admin" : "Guest Viewer"}
+                              </td>
+                              <td className="px-6 py-5 text-right">
+                                <button className="text-indigo-400 font-bold hover:text-indigo-300 transition-colors">Enter Portal</button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Storage Usage Visual */}
+                  <div>
+                    <h3 className="text-lg font-black text-white mb-6">Storage Allocation</h3>
+                    <div className="bg-[#121214] rounded-[2rem] border border-white/5 p-8">
+                      <div className="mb-6">
+                        <div className="flex justify-between text-sm font-bold mb-2">
+                          <span className="text-white">Workspace Data</span>
+                          <span className="text-slate-500">85%</span>
+                        </div>
+                        <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden">
+                          <div className="w-[85%] h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"></div>
+                        </div>
+                      </div>
+                      <div className="mb-6">
+                        <div className="flex justify-between text-sm font-bold mb-2">
+                          <span className="text-white">Media Assets</span>
+                          <span className="text-slate-500">42%</span>
+                        </div>
+                        <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden">
+                          <div className="w-[42%] h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"></div>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex justify-between text-sm font-bold mb-2">
+                          <span className="text-white">Archived Logs</span>
+                          <span className="text-slate-500">12%</span>
+                        </div>
+                        <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden">
+                          <div className="w-[12%] h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* DIRECTORY TAB */}
+            {activeTab === "directory" && (
+              <div className="space-y-10 animate-in fade-in duration-500">
+                <div className="flex items-end justify-between">
+                  <div>
+                    <h1 className="text-3xl font-black text-white tracking-tight mb-2">Members Directory</h1>
+                    <p className="text-slate-400 font-medium">Browse active personnel across your assigned workspaces.</p>
+                  </div>
+                  <div className="relative">
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <input type="text" placeholder="Search members..." className="bg-[#121214] border border-white/5 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:border-indigo-500 outline-none" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {MOCK_MEMBERS.map(member => (
+                    <div key={member.id} className="bg-[#121214] border border-white/5 rounded-[2rem] p-6 flex items-center gap-4 hover:border-white/10 transition-colors">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-white font-black shadow-inner">
+                        {member.name.charAt(0)}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-white font-bold text-sm">{member.name}</h4>
+                        <p className="text-slate-500 text-xs">{member.email}</p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-[10px] font-black uppercase text-indigo-400 mb-1">{member.role}</div>
+                        <div className={clsx("w-2 h-2 rounded-full ml-auto", member.status === 'Active' ? "bg-emerald-500" : member.status === 'Offline' ? "bg-slate-500" : "bg-amber-500")}></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* AUDIT LOGS TAB */}
+            {activeTab === "audit" && (
+              <div className="space-y-10 animate-in fade-in duration-500">
+                <div>
+                  <h1 className="text-3xl font-black text-white tracking-tight mb-2">Security Audit Logs</h1>
+                  <p className="text-slate-400 font-medium">Immutable record of critical system and security events.</p>
+                </div>
+
+                <div className="bg-[#121214] rounded-[2.5rem] border border-white/5 overflow-hidden">
+                  <table className="w-full text-left">
+                    <thead className="bg-white/[0.02] border-b border-white/5 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                      <tr>
+                        <th className="px-8 py-5">Event ID</th>
+                        <th className="px-8 py-5">Action</th>
+                        <th className="px-8 py-5">Initiator</th>
+                        <th className="px-8 py-5">IP Address</th>
+                        <th className="px-8 py-5">Timestamp</th>
+                        <th className="px-8 py-5">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5 text-sm">
+                      {MOCK_AUDIT_LOGS.map(log => (
+                        <tr key={log.id} className="hover:bg-white/[0.02] transition-colors">
+                          <td className="px-8 py-4 font-mono text-xs text-slate-500">#{log.id}</td>
+                          <td className="px-8 py-4 font-bold text-white">{log.action}</td>
+                          <td className="px-8 py-4 text-slate-400">{log.user}</td>
+                          <td className="px-8 py-4 font-mono text-xs text-slate-500">{log.ip}</td>
+                          <td className="px-8 py-4 text-slate-400">{log.time}</td>
+                          <td className="px-8 py-4">
+                            <span className={clsx("px-3 py-1 rounded-full text-[10px] font-bold border", log.status === 'Success' ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-rose-500/10 text-rose-400 border-rose-500/20")}>
+                              {log.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* SECURITY SETTINGS TAB */}
+            {activeTab === "security" && (
+              <div className="space-y-10 animate-in fade-in duration-500">
+                <div>
+                  <h1 className="text-3xl font-black text-white tracking-tight mb-2">Security Settings</h1>
+                  <p className="text-slate-400 font-medium">Manage your personal security protocols and access keys.</p>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="bg-[#121214] p-8 rounded-[2.5rem] border border-white/5 flex items-start gap-6 opacity-75">
+                    <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-400 shrink-0">
+                      <Fingerprint className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white mb-2">Two-Factor Authentication</h3>
+                      <p className="text-sm text-slate-400 mb-6 leading-relaxed">Require a cryptographic token from an authenticator app when signing in to B2BSync.</p>
+                      <button className="px-6 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-slate-300 cursor-not-allowed">Enable 2FA (Locked)</button>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#121214] p-8 rounded-[2.5rem] border border-white/5 flex items-start gap-6 opacity-75">
+                    <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-400 shrink-0">
+                      <Key className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white mb-2">Developer API Keys</h3>
+                      <p className="text-sm text-slate-400 mb-6 leading-relaxed">Generate secret keys to programmatically interact with the B2BSync API endpoints.</p>
+                      <button className="px-6 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-slate-300 cursor-not-allowed">Generate Key (Locked)</button>
+                    </div>
+                  </div>
+                  
+                  <div className="md:col-span-2 bg-indigo-500/5 border border-indigo-500/20 p-6 rounded-2xl flex gap-4">
+                    <AlertCircle className="w-6 h-6 text-indigo-400 shrink-0" />
+                    <div>
+                      <h4 className="text-indigo-400 font-bold mb-1">Notice</h4>
+                      <p className="text-sm text-slate-400">Security modifications are restricted to Organization Administrators. If you require changes to your authentication protocols, please contact your workspace owner.</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -327,7 +506,7 @@ export default function WorkspaceInvitationLab() {
                 <div className="grid lg:grid-cols-3 gap-8">
                   {/* Form Column */}
                   <div className="lg:col-span-2 space-y-6">
-                    <div className="bg-[#121214] rounded-[2rem] border border-white/5 p-8 relative overflow-hidden">
+                    <div className="bg-[#121214] rounded-[2.5rem] border border-white/5 p-8 relative overflow-hidden">
                       {/* Decorative Background Element */}
                       <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none"></div>
                       
@@ -358,7 +537,7 @@ export default function WorkspaceInvitationLab() {
                           <select 
                             value={selectedWorkspace}
                             onChange={(e) => setSelectedWorkspace(e.target.value)}
-                            className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all appearance-none"
+                            className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all appearance-none cursor-pointer"
                           >
                             {sessionData?.user?.workspaces.map((ws: string) => (
                               <option key={ws} value={ws} className="bg-[#121214]">{ws}</option>
@@ -447,7 +626,7 @@ export default function WorkspaceInvitationLab() {
                         
                         <div className="space-y-3">
                           <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Mission Objective Flag</div>
-                          <div className="bg-gradient-to-r from-rose-500/20 to-black border border-rose-500/30 p-6 rounded-2xl">
+                          <div className="bg-gradient-to-r from-rose-500/20 to-black border border-rose-500/30 p-6 rounded-2xl relative group">
                             <code className="text-rose-400 font-mono text-xl font-black break-all shadow-inner block text-center select-all">
                               {sessionData?.flag}
                             </code>
@@ -481,13 +660,4 @@ export default function WorkspaceInvitationLab() {
       </div>
     </div>
   );
-}
-
-// Additional icons required for the UI
-function Lock(props: any) {
-  return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>;
-}
-
-function Terminal(props: any) {
-  return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>;
 }
