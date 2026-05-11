@@ -64,13 +64,9 @@ export default async function LabPage({ params }: { params: Promise<{ id: string
   };
 
   return (
-    <LabEnvironment 
-      challengeId={challenge.id} 
-      targetUrl={getTargetUrl(id)} 
-      challengeName={challenge.name}
-    >
+    <div className="min-h-screen">
       {renderLab()}
-    </LabEnvironment>
+    </div>
   );
 }
 
