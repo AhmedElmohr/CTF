@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { 
   Users, 
   Shield, 
@@ -60,6 +60,7 @@ export default function WorkspaceInvitationLab() {
   
   const [sessionData, setSessionData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const attackBtnRef = useRef<HTMLButtonElement>(null);
 
   const fetchSession = async () => {
     try {
@@ -116,7 +117,7 @@ export default function WorkspaceInvitationLab() {
   };
   const handleUpdateSettings = async (e?: any) => {
     if (e && e.preventDefault) e.preventDefault();
-    alert("Transmission Sequence Initiated! Check your HTTP Interception proxy now.");
+    alert("[SYSTEM ALERT] API Propagation Request Fired Successfully!");
     setIsSubmitting(true);
     setMessage(null);
     try {
@@ -135,17 +136,30 @@ export default function WorkspaceInvitationLab() {
       });
       const result = await res.json();
       if (res.ok) {
-        setMessage({ type: 'success', text: "Application configuration pushed to server." });
+        setMessage({ type: 'success', text: "Configuration broadcast successful." });
         fetchSession();
       } else {
-        setMessage({ type: 'error', text: result.message || "Update failed." });
+        setMessage({ type: 'error', text: result.message || "API transmission rejected." });
       }
     } catch (err) {
-      setMessage({ type: 'error', text: "Network propagation error." });
+      setMessage({ type: 'error', text: "Network link layer error." });
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // FOOLPROOF NATIVE BINDING FALLBACK
+  useEffect(() => {
+    const btn = attackBtnRef.current;
+    if (btn) {
+      const nativeClick = (evt: MouseEvent) => {
+        console.log("Native Event Triggered on attack button!");
+        handleUpdateSettings(evt);
+      };
+      btn.addEventListener('click', nativeClick);
+      return () => btn.removeEventListener('click', nativeClick);
+    }
+  }, [isLoading, activeTab, sessionData?.user?.isVaultUnlocked]);
 
   if (isLoading) {
     return (
@@ -728,13 +742,18 @@ export default function WorkspaceInvitationLab() {
                                    <Settings className="w-3 h-3 opacity-50" /> State: Normal
                                 </div>
                                 <button 
+                                  ref={attackBtnRef}
                                   type="button"
-                                  onClick={() => handleUpdateSettings()}
+                                  id="foolproof-exploit-trigger-v2"
+                                  onClick={(e) => {
+                                    console.log("React Click Handler Fired!");
+                                    handleUpdateSettings(e);
+                                  }}
                                   disabled={isSubmitting}
-                                  className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black px-6 py-3 rounded-xl shadow-lg shadow-indigo-600/20 transition-all disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+                                  className="bg-rose-600 hover:bg-rose-500 text-white text-xs font-black px-6 py-3 rounded-xl shadow-lg shadow-rose-600/20 transition-all disabled:opacity-50 flex items-center gap-2 cursor-pointer animate-pulse duration-700"
                                 >
                                   {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-3 h-3" />}
-                                  Propagate System Settings
+                                  🚀 FORCE PUSH CONFIG (V2)
                                 </button>
                              </div>
                              {message && activeTab === "admin" && (
