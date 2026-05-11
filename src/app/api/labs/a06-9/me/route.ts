@@ -29,6 +29,8 @@ export async function GET(request: NextRequest) {
   const workspaces = (sessionData.workspaces as string[]) || [];
   const isAdminNow = workspaces.includes(ADMIN_WORKSPACE);
 
+  const isUnlocked = !!sessionData.isVaultUnlocked;
+
   return jsonWithSession(
     {
       success: true,
@@ -36,9 +38,10 @@ export async function GET(request: NextRequest) {
         email: sessionData.email,
         workspaces: sessionData.workspaces,
         isAdmin: isAdminNow,
+        isVaultUnlocked: isUnlocked
       },
-      flag: isAdminNow ? FLAG : null,
-      adminWorkspaceId: ADMIN_WORKSPACE // Only used to hint the attacker if they find it
+      flag: (isAdminNow && isUnlocked) ? FLAG : (isAdminNow ? "LOCKED_VAULT_ENCRYPTED_PAYLOAD_0x8fa2e" : null),
+      adminWorkspaceId: ADMIN_WORKSPACE 
     },
     sessionId,
     isNew

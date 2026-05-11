@@ -25,7 +25,11 @@ import {
   Fingerprint,
   Key,
   Globe,
-  Database
+  Database,
+  Eye,
+  EyeOff,
+  FileText,
+  Unlock
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -108,6 +112,29 @@ export default function WorkspaceInvitationLab() {
     } catch (err) {
       setIsSubmitting(false);
       setMessage({ type: 'error', text: "Failed to connect to API." });
+    }
+  };
+  const handleUpdateSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/labs/a06-9/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ theme: "dark", layout: "grid" }) // Standard user visible settings
+      });
+      const result = await res.json();
+      if (res.ok) {
+        setMessage({ type: 'success', text: "Application settings updated on cloud cluster." });
+        fetchSession();
+      } else {
+        setMessage({ type: 'error', text: result.message || "Settings update failed." });
+      }
+    } catch (err) {
+      setMessage({ type: 'error', text: "Could not update settings." });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -600,42 +627,157 @@ export default function WorkspaceInvitationLab() {
 
             {/* ADMIN TAB */}
             {activeTab === "admin" && (
-              <div className="animate-in fade-in duration-500">
+              <div className="animate-in fade-in duration-500 space-y-10">
                 {sessionData?.user?.isAdmin ? (
-                  <div className="bg-[#121214] p-10 lg:p-16 rounded-[3rem] border border-white/5 shadow-2xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-rose-500/10 rounded-full blur-[120px] -mr-40 -mt-40 pointer-events-none"></div>
-                    <div className="relative z-10 max-w-2xl">
-                      <div className="flex items-center gap-6 mb-10">
-                        <div className="w-20 h-20 bg-rose-500/20 border border-rose-500/30 rounded-3xl flex items-center justify-center shadow-2xl shadow-rose-500/20">
-                          <ShieldAlert className="w-10 h-10 text-rose-500" />
+                  sessionData?.user?.isVaultUnlocked ? (
+                    // Case 1: VAULT UNLOCKED - SHOW FLAG
+                    <div className="bg-[#121214] p-10 lg:p-16 rounded-[3rem] border border-emerald-500/30 shadow-[0_0_50px_rgba(16,185,129,0.15)] relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] -mr-40 -mt-40 pointer-events-none animate-pulse"></div>
+                      <div className="relative z-10 max-w-3xl">
+                        <div className="flex items-center gap-6 mb-10">
+                          <div className="w-20 h-20 bg-emerald-500/20 border border-emerald-500/40 rounded-3xl flex items-center justify-center shadow-2xl shadow-emerald-500/20">
+                            <Unlock className="w-10 h-10 text-emerald-400" />
+                          </div>
+                          <div>
+                            <h2 className="text-4xl font-black text-white tracking-tight flex items-center gap-3">
+                              Central Data Vault <span className="text-emerald-400 bg-emerald-500/10 text-xs font-black uppercase px-3 py-1 rounded-full border border-emerald-500/20">Open</span>
+                            </h2>
+                            <p className="text-emerald-400 font-bold text-xs uppercase tracking-widest mt-2 flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                              Privileged Decryption Successful
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <h2 className="text-4xl font-black text-white tracking-tight">System Admin</h2>
-                          <p className="text-rose-400 font-bold text-xs uppercase tracking-widest mt-2 flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-                            Maximum Privilege Level Granted
-                          </p>
-                        </div>
-                      </div>
 
-                      <div className="bg-black/40 border border-white/5 p-8 rounded-[2rem] backdrop-blur-sm mb-8">
-                        <h3 className="text-white font-black text-xl mb-4">Vulnerability Details: Type Confusion</h3>
-                        <p className="text-sm text-slate-400 mb-6 leading-relaxed">
-                          You successfully bypassed the B2BSync authorization controls. The middleware filter expected a string and verified only <code className="text-rose-400 bg-rose-500/10 px-1 py-0.5 rounded">workspace_id[0]</code>, which passed the check. However, the database execution layer accepted the full array, assigning you to the restricted admin workspace.
-                        </p>
-                        
-                        <div className="space-y-3">
-                          <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Mission Objective Flag</div>
-                          <div className="bg-gradient-to-r from-rose-500/20 to-black border border-rose-500/30 p-6 rounded-2xl relative group">
-                            <code className="text-rose-400 font-mono text-xl font-black break-all shadow-inner block text-center select-all">
-                              {sessionData?.flag}
-                            </code>
+                        <div className="bg-black/60 border border-emerald-500/20 p-8 rounded-[2.5rem] backdrop-blur-md mb-8 relative group">
+                          <div className="absolute -top-3 right-8 bg-emerald-500 text-black text-[10px] font-black px-3 py-1 rounded-full">DECRYPTED PAYLOAD</div>
+                          <div className="space-y-6">
+                            <p className="text-sm text-slate-400 leading-relaxed">
+                              Congratulations. You chained <strong>Type Confusion</strong> to bypass access control, followed by <strong>Mass Assignment</strong> to overwrite persistent object variables in the application context.
+                            </p>
+                            <div className="bg-gradient-to-r from-emerald-900/20 to-black border border-emerald-500/30 p-8 rounded-3xl">
+                              <code className="text-emerald-400 font-mono text-2xl font-black break-all shadow-inner block text-center select-all tracking-wider">
+                                {sessionData?.flag}
+                              </code>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  ) : (
+                    // Case 2: ADMIN LOGGED IN BUT VAULT IS LOCKED (NEEDS MASS ASSIGNMENT)
+                    <div className="space-y-8">
+                      <div className="bg-rose-500/10 border border-rose-500/20 p-6 rounded-[2rem] flex flex-col md:flex-row items-start md:items-center gap-6 justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-rose-500/20 rounded-xl flex items-center justify-center shrink-0">
+                            <ShieldAlert className="w-6 h-6 text-rose-400" />
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-black text-white tracking-tight">Access Phase 1 Completed</h3>
+                            <p className="text-sm text-slate-400">You are inside the Admin Dashboard. However, critical assets are in a second-layer cold storage lockbox.</p>
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-rose-400 bg-rose-500/10 border border-rose-500/20 px-3 py-1.5 rounded-full">Security Stage: Partial Access</span>
+                        </div>
+                      </div>
+
+                      <div className="grid lg:grid-cols-5 gap-8">
+                        {/* Main Locked Vault Area */}
+                        <div className="lg:col-span-3 bg-[#121214] p-10 rounded-[3rem] border border-white/5 relative overflow-hidden flex flex-col items-center justify-center min-h-[400px] shadow-2xl">
+                          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.02]"></div>
+                          
+                          <div className="relative mb-8 flex flex-col items-center">
+                            <div className="absolute inset-0 bg-indigo-500/20 rounded-full blur-[60px]"></div>
+                            <div className="w-32 h-32 bg-black border-4 border-slate-800/50 rounded-full flex items-center justify-center shadow-[inset_0_0_20px_rgba(0,0,0,0.8)] relative z-10 group overflow-hidden">
+                              <div className="absolute inset-0 bg-gradient-to-tr from-slate-900 to-indigo-900/20 opacity-50 group-hover:opacity-80 transition-opacity"></div>
+                              <Lock className="w-12 h-12 text-slate-600 z-20" />
+                            </div>
+                          </div>
+
+                          <h3 className="text-2xl font-black text-white mb-3 tracking-tight">Secure Key Vault Locked</h3>
+                          <p className="text-slate-400 text-center max-w-md text-sm mb-8 leading-relaxed font-medium">
+                            Organization Root Access required to view underlying secrets. 
+                            Current decryption routine reports: <code>ERR_INSUFFICIENT_CLEARANCE</code>.
+                          </p>
+
+                          <div className="w-full bg-black/50 border border-white/5 p-6 rounded-2xl mb-6">
+                             <div className="flex justify-between items-center mb-3 text-xs font-black text-slate-500 uppercase tracking-widest">
+                               <span>Cipher Blob</span>
+                               <span className="flex items-center gap-2 text-rose-500 animate-pulse"><div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div> LOCKED</span>
+                             </div>
+                             <div className="font-mono text-slate-600 text-sm blur-[2px] select-none line-clamp-1 break-all bg-white/5 p-3 rounded-lg border border-white/5">
+                               {sessionData?.flag || "ENCRYPTED_HEX_PAYLOAD_DUMMY_DATA_19284712947129"}
+                             </div>
+                          </div>
+
+                          {/* Dummy Feature to update preferences */}
+                          <div className="w-full border-t border-white/5 pt-6">
+                             <p className="text-[10px] font-black uppercase text-slate-500 mb-4 text-center">Workspace User Configuration</p>
+                             <form onSubmit={handleUpdateSettings} className="flex items-center justify-center gap-4">
+                                <div className="text-xs text-slate-300 bg-white/5 px-4 py-2.5 rounded-xl border border-white/5 font-bold flex items-center gap-2">
+                                   <Settings className="w-3 h-3 opacity-50" /> Prefs: Dark, Grid
+                                </div>
+                                <button 
+                                  type="submit" 
+                                  disabled={isSubmitting}
+                                  className="bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-black px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-500/20 transition-all disabled:opacity-50"
+                                >
+                                  {isSubmitting ? "Saving..." : "Save Client UI State"}
+                                </button>
+                             </form>
+                             {message && activeTab === "admin" && (
+                               <div className="mt-4 text-center text-xs font-bold text-emerald-400 flex items-center justify-center gap-2 bg-emerald-500/10 py-2 rounded-xl animate-in zoom-in-95 duration-200">
+                                 <CheckCircle2 className="w-3 h-3" /> {message.text}
+                               </div>
+                             )}
+                          </div>
+                        </div>
+
+                        {/* Hints / API docs Area */}
+                        <div className="lg:col-span-2 space-y-6">
+                          <div className="bg-gradient-to-br from-[#121214] to-[#0f0f10] p-8 rounded-[2.5rem] border border-white/5 h-full flex flex-col">
+                            <div className="flex items-center gap-3 mb-6">
+                              <div className="w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center border border-indigo-500/20 text-indigo-400">
+                                <Terminal className="w-5 h-5" />
+                              </div>
+                              <h4 className="font-black text-white text-lg">API Introspection</h4>
+                            </div>
+                            <p className="text-sm text-slate-400 leading-relaxed mb-6">
+                              The developer endpoint for user customization writes raw configuration properties directly into the persistent session context.
+                            </p>
+                            
+                            <div className="space-y-4 mt-auto">
+                              <div className="bg-black/50 p-4 rounded-xl border border-white/5">
+                                <div className="text-[10px] font-black uppercase text-emerald-400 mb-1 tracking-widest">Target Endpoint</div>
+                                <code className="text-xs text-slate-300 font-mono font-bold">PUT /api/labs/a06-9/settings</code>
+                              </div>
+                              <div className="bg-black/50 p-4 rounded-xl border border-white/5 relative group">
+                                <div className="text-[10px] font-black uppercase text-indigo-400 mb-2 tracking-widest flex justify-between">
+                                  <span>Schema Inspector</span>
+                                  <FileText className="w-3 h-3 opacity-50" />
+                                </div>
+                                <pre className="text-[11px] text-slate-500 font-mono leading-tight">
+                                  {`{\n  "theme": "string",\n  "layout": "string",\n  "isVaultUnlocked": "boolean" // Internal Only\n}`}
+                                </pre>
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <span className="text-[10px] bg-slate-800 text-white px-2 py-1 rounded font-bold border border-white/10 shadow-xl">Hidden Properties Detected</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="mt-6 bg-amber-500/5 border border-amber-500/20 rounded-2xl p-4 flex items-start gap-3">
+                               <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                               <p className="text-xs text-amber-500/80 leading-normal font-medium">
+                                 Note: The backend uses blind Object Merger to map incoming keys to the cloud session bucket. Ensure strict input sanitation is ignored.
+                               </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )
                 ) : (
+                  // Case 3: NOT AN ADMIN AT ALL
                   <div className="flex flex-col items-center justify-center text-center py-20 px-4">
                     <div className="relative mb-8">
                       <div className="absolute inset-0 bg-rose-500/20 rounded-full blur-2xl"></div>
